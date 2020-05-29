@@ -78,16 +78,22 @@ class ApiClientHandler implements InvocationHandler {
     private HttpClient client;
     private final HttpRequestFactory requestFactory;
     private final ClientConfiguration clientConfiguration;
+    private final HeaderProvider headerProvider;
 
-    ApiClientHandler(String endpoint, String apiName,
-            Signer signer, AWSCredentialsProvider provider, String apiKey,
-            ClientConfiguration clientConfiguration) {
+    ApiClientHandler(String endpoint,
+                     String apiName,
+                     Signer signer,
+                     AWSCredentialsProvider provider,
+                     String apiKey,
+                     ClientConfiguration clientConfiguration,
+                     HeaderProvider headerProvider) {
         this.endpoint = endpoint;
         this.apiName = apiName;
         this.signer = signer;
         this.provider = provider;
         this.apiKey = apiKey;
         this.clientConfiguration = clientConfiguration;
+        this.headerProvider = headerProvider;
 
         client = new UrlHttpClient(this.clientConfiguration);
         requestFactory = new HttpRequestFactory();
@@ -198,6 +204,17 @@ class ApiClientHandler implements InvocationHandler {
         if (provider != null && signer != null) {
             signer.sign(request, provider.getCredentials());
         }
+
+        if (headerProvider != null) {
+            final Map<String, String> customHeaders = headerProvider.getHeaders();
+            if (customHeaders != null && !customHeaders.isEmpty()) {
+                for (final Map.Entry<String, String> header : customHeaders.entrySet()) {
+                    final String key = header.getKey();
+                    request.addHeader(key, header.getValue());
+                }
+            }
+        }
+
         return request;
     }
 

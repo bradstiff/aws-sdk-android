@@ -41,6 +41,7 @@ public class ApiClientFactory {
     private String regionOverride;
     private AWSCredentialsProvider provider;
     private ClientConfiguration clientConfiguration;
+    private HeaderProvider headerProvider;
 
     /**
      * Sets the endpoint of the APIs.
@@ -104,6 +105,18 @@ public class ApiClientFactory {
     }
 
     /**
+     * Sets a custom header provider, if needed. Headers will be added to the request.
+     *
+     * @param provider a custom header provider
+     * @return the factory itself for chaining
+     */
+    @SuppressWarnings("checkstyle:hiddenfield")
+    public ApiClientFactory headerProvider(HeaderProvider provider) {
+        this.headerProvider = provider;
+        return this;
+    }
+
+    /**
      * Instantiates a client for the given API.
      *
      * @param <T> the api client interface.
@@ -142,7 +155,7 @@ public class ApiClientFactory {
         // Ensure we always pass a configuration to the handler
         final ClientConfiguration configuration = (clientConfiguration == null) ? new ClientConfiguration() : clientConfiguration;
 
-        return new ApiClientHandler(endpoint, apiName, signer, provider, apiKey, configuration);
+        return new ApiClientHandler(endpoint, apiName, signer, provider, apiKey, configuration, headerProvider);
     }
 
     /**
