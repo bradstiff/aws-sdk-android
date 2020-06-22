@@ -15,6 +15,8 @@
 
 package com.amazonaws.mobileconnectors.apigateway;
 
+import android.util.Pair;
+
 import com.amazonaws.ClientConfiguration;
 import com.amazonaws.DefaultRequest;
 import com.amazonaws.Request;
@@ -206,15 +208,13 @@ class ApiClientHandler implements InvocationHandler {
         }
 
         if (headerProvider != null) {
-            final Map<String, String> customHeaders = headerProvider.getHeaders();
-            if (customHeaders != null && !customHeaders.isEmpty()) {
-                for (final Map.Entry<String, String> header : customHeaders.entrySet()) {
-                    final String key = header.getKey();
-                    request.addHeader(key, header.getValue());
-                }
+            final Pair<String, String> customHeader;
+            customHeader = headerProvider.getHeader();
+            if (customHeader != null) {
+                request.addHeader(customHeader.first, customHeader.second);
             }
+            return request;
         }
-
         return request;
     }
 
